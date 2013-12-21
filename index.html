@@ -1,0 +1,73 @@
+﻿<html>
+    <head>
+        <title>Картограмма "Население России"</title>
+        <meta charset="utf-8" />
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+        <link rel="stylesheet" href="leaflet.css">
+    </head>
+
+    <body>
+        <div id="map" style="height: 100%; width: 100%"></div>
+        
+        <!-- Подключаем leaflet -->
+        <script type="text/javascript" src="leaflet.js"></script>
+        
+        <!-- Подключаем geoJSON файл с границами субъектов РФ -->
+        <script type="text/javascript" src="rusbounds.js"></script>
+        
+        <!-- Основной скрипт для работы с картой -->
+        <script type="text/javascript">
+            
+            <!-- Создаем объект "карта" с заданным центом (географ. координаты точки) и увеличением -->
+            var map = L.map('map').setView([63.47, 100.4], 4);
+
+            <!-- Задаем URL-шаблон для тайлов, используя cloudmade.com, текст копирайтов и стиль тайлов -->
+            var cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/{key}/{styleId}/256/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
+                key: 'BC9A493B41014CAABB98F0471D759707',
+                styleId: 22677
+            }).addTo(map);
+            
+            function style(feature) {
+                return {
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7,
+                    fillColor: '#FFEDA0'
+                };
+            }
+                
+            var geojson = L.geojson(rusbounds_data, {
+                    style: style
+                }).addTo(map);
+            
+            map.attributionControl.addAttribution('Данные о наслении &copy; <a href="http://gks.ru">Федеральная служба государственной статистики</a>');
+                       
+        </script>
+
+    </body>
+</html>
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
