@@ -15,7 +15,7 @@
 
 > ogr2ogr -f 'ESRI Shapefile' -s_srs albres.prj -t_srs EPSG:4326 ./fixed.shp ./regions2010_sib_10.shp
     
-3. Теперь нам необходимо преобразовать полученный файл в формат GeoJSON для последующего использования в \
+3. Теперь нам необходимо преобразовать полученный файл в формат GeoJSON для последующего использования в
 LeafletJS. Используем опять же ogr2ogr:
 
 > ogr2ogr -f 'GeoJSON' rusbounds_2010.json fixed.shp
