@@ -3,34 +3,63 @@
         <title>Картограмма "Население России"</title>
         <meta charset="utf-8" />
         <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-        <link rel="stylesheet" href="leaflet.css">
-    </head>
-
-    <body>
-        <div id="map" style="height: 100%; width: 100%"></div>
+        <link rel="stylesheet" href="css/leaflet.css">
         
         <!-- Подключаем leaflet -->
-        <script type="text/javascript" src="leaflet.js"></script>
+        <script type="text/javascript" src="js/leaflet.js"></script>
         
         <!-- Подключаем geoJSON файл с границами субъектов РФ -->
-        <script type="text/javascript" src="rusbounds.js"></script>
+        <script type="text/javascript" src="js/rusbounds.js"></script>
         
-        <!-- Основной скрипт для работы с картой -->
+        <!-- Подключаем jquery и jquery-csv -->
+        <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+        <script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+        
+        
         <script type="text/javascript">
             
-            <!-- Создаем объект "карта" с заданным центом (географ. координаты точки) и увеличением -->
-            var map = L.map('map', {
-                maxZoom: 5
-            }).setView([63.47, 100.4], 4);
-
-            <!-- Задаем URL-шаблон для тайлов, используя cloudmade.com, текст копирайтов и стиль тайлов -->
-            var cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/{key}/{styleId}/256/{z}/{x}/{y}.png', {
-                attribution: 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade<be> \
-                              | Данные о наслении &copy; <a href="http://gks.ru">Федеральная служба государственной статистики</a>',
-                key: 'BC9A493B41014CAABB98F0471D759707',
-                styleId: 22677
-            }).addTo(map);
-                
+            <!-- Скрипт для преобразования CSV-файлы с данными о населении в массивы JS -->
+            function convertCSV() {
+                var result;
+                $.ajax({
+                   type: "GET",
+                   async: false,
+                   dataType: "text",
+                   url: "data/population.csv",
+                   success: function(msg){
+                     result = $.csv.toArrays(msg);
+                   }
+                 });
+                return result; 
+            }
+            
+            <!-- Функция выбора цвета полигона в зависимости от плотности населения -->   
+            function getColor(density) {
+                    //alert(density);
+                    return density > 100  ? '#a63603' :
+                           density > 72  ? '#e6550d' :
+                           density > 50  ? '#fd8d3c' :
+                           density > 25   ? '#fdae6b' :
+                           density > 10   ? '#fdd0a2' :
+                                            '#feedde' ;
+            } 
+            
+            <!-- Задает стиль полигона -->
+            function style(feature) {
+                //alert(feature.properties.ID);
+                var row = parseInt(feature.properties.ID);
+                //alert(data[row-1][6]);
+                return {
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7,
+                    fillColor: getColor(data[row-1][6])
+                };
+            }  
+            
+            <!-- Подсветка полигона при наведении на него мыши -->
             function highlightFeature(e) {
                 var layer = e.target;
 
@@ -48,55 +77,73 @@
                 info.update(layer.feature.properties);
             }
             
+            <!-- Убирает подсветку полигона -->
             function resetHighlight(e) {
                 geojson.resetStyle(e.target);
                 
             }
-
+            
+            <!-- Увеличивает зум на выбранный полигон -->
             function zoomToFeature(e) {
                 map.fitBounds(e.target.getBounds());
             }
-
+            
             function onEachFeature(feature, layer) {
                 layer.on({
                     mouseover: highlightFeature,
                     mouseout: resetHighlight,
                     click: zoomToFeature
                 });
-                layer.bindPopup(String(feature.properties.UNIVERSAL));
+                layer.bindPopup(feature.properties.UNIVERSAL);
             }
             
-            function style(feature) {
-            
-                return {
-                    weight: 2,
-                    opacity: 1,
-                    color: 'white',
-                    dashArray: '3',
-                    fillOpacity: 0.7,
-                    fillColor: '#800026'
-                };
-            }
-                
-
-            var geojson = L.geoJson(rusbounds_data, {
-                style: style,
-                onEachFeature: onEachFeature
-            }).addTo(map);
-            
-            var popup = L.popup();
-            
+            <!-- Обработка нажатия на карту -->
             function onMapClick(e) {
                 popup
                     .setLatLng(e.latlng)
                     .setContent("You clicked the map at " + e.latlng.toString())
                     .openOn(map);
             }
-            map.on('click', onMapClick);
+   
+        </script>    
+                    
+    </head>
+
+    <body>
+        <div id="map" style="height: 80%; width: 80%"></div>
+
+        <!-- Основной скрипт -->
+        <script type="text/javascript">
+        
+           
+            //var theFile = new XMLHttpRequest();
+            var data = convertCSV();
             
+            <!-- Создаем объект "карта" с заданным центом (географ. координаты точки) и увеличением -->
+            var map = L.map('map', {
+                maxZoom: 5
+            }).setView([63.47, 100.4], 4);
+
+            <!-- Задаем URL-шаблон для тайлов, используя cloudmade.com, текст копирайтов и стиль тайлов -->
+            var cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/{key}/{styleId}/256/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade<be> \
+                              | Данные о наслении &copy; <a href="http://gks.ru">Федеральная служба государственной статистики</a>',
+                key: 'BC9A493B41014CAABB98F0471D759707',
+                styleId: 22677
+            }).addTo(map);
+            
+            var geojson = L.geoJson(rusbounds_data, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+                           
+            var popup = L.popup();
+            
+            map.on('click', onMapClick);
+
                                    
         </script>
-
+    <div id="new"></div>
     </body>
 </html>
 
