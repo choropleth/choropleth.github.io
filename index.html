@@ -2,10 +2,15 @@
     <head>
         <title>Картограмма "Население России"</title>
         <meta charset="utf-8" />
-        <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!-- Leaflet CSS -->
         <link rel="stylesheet" href="css/leaflet.css">
         
-        <!-- Подключаем leaflet -->
+        <!-- Bootstrap CSS -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        
+        <!-- Подключаем leaflet js -->
         <script type="text/javascript" src="js/leaflet.js"></script>
         
         <!-- Подключаем geoJSON файл с границами субъектов РФ -->
@@ -15,10 +20,17 @@
         <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
         <script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
         
-        
+        <!-- Отступы для хедера и футера -->
+        <style>  
+            body {
+              padding-top: 50px;
+              padding-bottom: 50px;
+            }
+        </style>
+                    
         <script type="text/javascript">
             
-            <!-- Скрипт для преобразования CSV-файлы с данными о населении в массивы JS -->
+            <!-- Скрипт для преобразования CSV-файла с данными о населении в массив JS -->
             function convertCSV() {
                 var result;
                 $.ajax({
@@ -104,6 +116,16 @@
     </head>
 
     <body>
+    
+        <!-- Код для верхней панели bootstrap -->
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="http://choropleth.github.io">Картограмма "Население Российской Федерации"</a>
+                </div>
+            </div>
+        </div>
+        
         <div id="map" style="height: 100%; width: 100%"></div>
 
         <!-- Основной скрипт -->
@@ -131,10 +153,17 @@
             }).addTo(map);
                            
             var popup = L.popup();
-            
-            map.on('click', onMapClick);
                                  
         </script>
-    <div id="new"></div>
+        
+        <!-- Код для нижней панели bootstrap -->
+        <div class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <br><font color='#FFFFFF'>Задание выполнили студенты ФПКиФ ИСиТ 5-1с: Величко С., Гафин А., Жданов А.</font>
+                </div>    
+            </div>
+        </div>
+
     </body>
 </html>  
