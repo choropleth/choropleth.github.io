@@ -23,14 +23,26 @@
         <!-- Отступы для хедера и футера -->
         <style>  
             body {
-              padding-top: 50px;
-              padding-bottom: 50px;
+              padding-top: 50px; /* отступ сверху */
+              padding-bottom: 50px; /* отступ снизу */
             }
         </style>
                     
         <script type="text/javascript">
             
-            /* Скрипт для преобразования CSV-файла с данными о населении в массив JS */
+            /* 
+               Функция для преобразования CSV-файла с данными о населении в массив JS.
+               
+               С помощью функции jQuery.ajax выполняем СИНХРОННЫЙ GET запрос для чтения csv файла.
+               
+               Важно: свойства async установлено в false потому что нам важно дождатся окончания 
+               выполнения запроса перед началом выполнения отрисовки карты, т.к. данные из CSV файла
+               будут использоваться при отрисовке.
+               
+               Если запрос выполнен удачно, с помощью библиотеки jquery-csv преобразуем содержимое 
+               csv-файла в двумерный массив JS.
+               Функция возвращает полученный массив.
+            */
             function convertCSV() {
                 var result;
                 $.ajax({
@@ -45,48 +57,60 @@
                 return result; 
             }
             
-            /* Функция выбора цвета полигона в зависимости от плотности населения */  
+            /* 
+               Функция выбора цвета полигона в зависимости от плотности населения 
+               
+               В качестве аргумента принимает значение плотности населения.
+               Возвращает значение цвета.
+            */  
             function getColor(density) {
-                    return density > 100  ? '#bd0026' :
-                           density > 75   ? '#f03b20' :
-                           density > 50   ? '#fd8d3c' :
-                           density > 25   ? '#feb24c' :
-                           density > 10   ? '#fed976' :
-                                            '#ffffb2' ;
+                return density > 100  ? '#bd0026' :
+                       density > 75   ? '#f03b20' :
+                       density > 50   ? '#fd8d3c' :
+                       density > 25   ? '#feb24c' :
+                       density > 10   ? '#fed976' :
+                                        '#ffffb2' ;
             } 
             
-            /* Задает стиль полигона */
+            /* 
+               Функция задает стиль полигона 
+            */
             function style(feature) {
+                /* row определяет номер строки в массиве data в зависимости от ID в GeoJSON файле */
                 var row = parseInt(feature.properties.ID);
                 return {
-                    weight: 2,
-                    opacity: 1,
-                    color: 'white',
-                    dashArray: '3',
-                    fillOpacity: 0.7,
-                    fillColor: getColor(data[row-1][6])
+                    weight: 2, // толщина границы
+                    opacity: 1, // прозрачность
+                    color: 'white', // цвет границы
+                    dashArray: '3', // прерывистость границы
+                    fillOpacity: 0.7, // прозрачность заливки
+                    /*
+                       Используем функцию getColor(density) для определения цвета заливки полигона.
+                       В качестве параметра передаем значение плотности населения из массива data (полученного из csv).
+                       [row - 1][6], т.к. элементы массива нумеруются с нуля!
+                    */
+                    fillColor: getColor(data[row-1][6]) 
                 };
             }  
             
-            /* Подсветка полигона при наведении на него мыши */
+            /*  Функция для подсветки границы полигона при наведении на него курсора мыши */
             function highlightFeature(e) {
                 var layer = e.target;
 
                 layer.setStyle({
-                    weight: 5,
-                    color: '#666',
-                    dashArray: '',
-                    fillOpacity: 0.7
+                    weight: 5, // толщина границы
+                    color: '#666', // цвет границы
+                    dashArray: '', // прерывистость
+                    fillOpacity: 0.7 // прозрачность заливки
                 });
-
+                
+                // для Opera и Internet Explorer
                 if (!L.Browser.ie && !L.Browser.opera) {
                     layer.bringToFront();
                 }
-
-                info.update(layer.feature.properties);
             }
             
-            /* Убирает подсветку полигона */
+            /* Функция сброса подсветки границы полигона */
             function resetHighlight(e) {
                 geojson.resetStyle(e.target);
                 
@@ -97,13 +121,19 @@
                 map.fitBounds(e.target.getBounds());
             }
             
+            /* Функция поведения для каждого полигона */
             function onEachFeature(feature, layer) {
                 layer.on({
-                    mouseover: highlightFeature,
-                    mouseout: resetHighlight,
-                    click: zoomToFeature
+                    mouseover: highlightFeature, // при наведении курсор на полигон подсвечивать границы
+                    mouseout: resetHighlight, // соответственно, убирать подсветку, когда курсор уводится
+                    click: zoomToFeature // при нажатии на полигон приблизить карту
                 });
                 var row = parseInt(feature.properties.ID);
+                
+                /*
+                   Присваиваем шаблон всплывающего сообщения при нажатии на полигон
+                   Данные о населении берутся из массива data
+                */
                 layer.bindPopup('<b>Субъект: </b>' + feature.properties.REGION + '<br>\
                                  <b>Численность населения: </b>' + data[row - 1][2] + ' чел.<br>\
                                  <b>Городское население: </b>' + data[row - 1][3] + ' чел.<br>\
@@ -131,15 +161,14 @@
         <!-- Основной скрипт создания карты -->
         <script type="text/javascript">
            
-            //var theFile = new XMLHttpRequest();
-            var data = convertCSV();
+            var data = convertCSV(); // создаем массив с данными о населении из csv таблицы
             
-            <!-- Создаем объект "карта" с заданным центом (географ. координаты точки) и увеличением -->
+            // Создаем объект "карта" с заданным центом (географ. координаты точки) и увеличением
             var map = L.map('map', {
                 maxZoom: 5
             }).setView([63.47, 100.4], 4);
 
-            <!-- Задаем URL-шаблон для тайлов, используя cloudmade.com, текст копирайтов и стиль тайлов -->
+            // Задаем URL-шаблон для тайлов, используя cloudmade.com, текст копирайтов и стиль тайлов
             var cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/{key}/{styleId}/256/{z}/{x}/{y}.png', {
                 attribution: 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade<be> \
                               | Данные о наслении &copy; <a href="http://gks.ru">Федеральная служба государственной статистики</a>',
@@ -147,6 +176,7 @@
                 styleId: 22677
             }).addTo(map);
             
+            // Создаем объект geojson и выводим его на карту 
             var geojson = L.geoJson(rusbounds_data, {
                 style: style,
                 onEachFeature: onEachFeature
