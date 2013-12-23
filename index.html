@@ -30,7 +30,7 @@
                     
         <script type="text/javascript">
             
-            <!-- Скрипт для преобразования CSV-файла с данными о населении в массив JS -->
+            /* Скрипт для преобразования CSV-файла с данными о населении в массив JS */
             function convertCSV() {
                 var result;
                 $.ajax({
@@ -45,7 +45,7 @@
                 return result; 
             }
             
-            <!-- Функция выбора цвета полигона в зависимости от плотности населения -->   
+            /* Функция выбора цвета полигона в зависимости от плотности населения */  
             function getColor(density) {
                     return density > 100  ? '#bd0026' :
                            density > 75   ? '#f03b20' :
@@ -55,7 +55,7 @@
                                             '#ffffb2' ;
             } 
             
-            <!-- Задает стиль полигона -->
+            /* Задает стиль полигона */
             function style(feature) {
                 var row = parseInt(feature.properties.ID);
                 return {
@@ -68,7 +68,7 @@
                 };
             }  
             
-            <!-- Подсветка полигона при наведении на него мыши -->
+            /* Подсветка полигона при наведении на него мыши */
             function highlightFeature(e) {
                 var layer = e.target;
 
@@ -86,13 +86,13 @@
                 info.update(layer.feature.properties);
             }
             
-            <!-- Убирает подсветку полигона -->
+            /* Убирает подсветку полигона */
             function resetHighlight(e) {
                 geojson.resetStyle(e.target);
                 
             }
             
-            <!-- Увеличивает зум на выбранный полигон -->
+            /* Увеличивает зум на выбранный полигон */
             function zoomToFeature(e) {
                 map.fitBounds(e.target.getBounds());
             }
@@ -128,7 +128,7 @@
         
         <div id="map" style="height: 100%; width: 100%"></div>
 
-        <!-- Основной скрипт -->
+        <!-- Основной скрипт создания карты -->
         <script type="text/javascript">
            
             //var theFile = new XMLHttpRequest();
@@ -160,7 +160,7 @@
         <div class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
             <div class="container">
                 <div class="navbar-header">
-                    <br><font color='#FFFFFF'>Задание выполнили студенты ФПКиФ ИСиТ 5-1с: Величко С., Гафин А., Жданов А.</font>
+                    <br><font color='#FFFFFF'>Задание выполнили студенты ФПКиФ ИСиТ 5-1с: Величко Семен, Гафин Андрей, Жданов Александр</font>
                 </div>    
             </div>
         </div>
