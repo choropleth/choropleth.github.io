@@ -5,13 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <!-- Leaflet CSS -->
-        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.css" />
         
         <!-- Bootstrap CSS -->
         <link href="css/bootstrap.min.css" rel="stylesheet">
         
         <!-- Подключаем leaflet js -->
-        <script type="text/javascript" src="js/leaflet.js"></script>
+        <script src="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.js?2"></script>
         
         <!-- Подключаем geoJSON файл с границами субъектов РФ -->
         <script type="text/javascript" src="js/rusbounds.js"></script>
@@ -24,6 +24,10 @@
         <script src="js/l.control.geosearch.js"></script>
         <script src="js/l.geosearch.provider.openstreetmap.js"></script>    
         <link rel="stylesheet" href="css/l.geosearch.css" />
+        
+        <!-- Leaflet-yandex plugin -->
+        <script src="http://api-maps.yandex.ru/2.0/?load=package.map&lang=ru-RU"></script>
+        <script src='js/leaflet-yandex.js'></script>
        
         <!-- Отступы для хедера и футера -->
         <style>  
@@ -176,7 +180,7 @@
             var data = convertCSV(); // создаем массив с данными о населении из csv таблицы
             
             // Создаем объект "карта" с заданным центом (географ. координаты точки) и увеличением
-            var map = L.map('map').setView([63.47, 100.4], 4);
+            var map = L.map('map', {maxZoom: 10}).setView([63.47, 100.4], 4);
 
             // Задаем URL-шаблон для тайлов, используя cloudmade.com, текст копирайтов и стиль тайлов
             var cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/{key}/{styleId}/256/{z}/{x}/{y}.png', {
@@ -186,14 +190,33 @@
                 styleId: 22677
             }).addTo(map);
             
+            // создаем слой Яндекс.Карты
+            var yandexLayer = new L.Yandex();
+            
             // Создаем объект geojson и выводим его на карту 
             var geojson = L.geoJson(rusbounds_data, {
                 style: style,
                 onEachFeature: onEachFeature
             }).addTo(map);
-                           
+            
+            // базовые слои - OpenStreetMaps и Яндекс.Карты
+            var baseLayers = {
+                "OSM": cloudmade,
+                "Yandex Maps": yandexLayer
+            };
+            
+            // оверлей - субъекты РФ
+            var overlays = {
+                "Субъекты РФ": geojson
+            };
+            
+            // Создаем контрол для выбора слоя
+            L.control.layers(baseLayers, overlays).addTo(map);
+           
             var popup = L.popup();
             
+            //map.addControl(new L.Control.Layers({'OSM':cloudmade, 'Google': googleLayer}));
+                
             // Leaflet.Geosearch
             var regionParameter = getURLParameter('region');
             var region = (regionParameter === 'undefined') ? '' : regionParameter;
